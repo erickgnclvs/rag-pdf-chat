@@ -1,8 +1,8 @@
-streamlit
-pyPDF2
-faiss-cpu
-numpy
-pyfiglet
-rich
-ollama
-python-dotenv
+streamlit>=1.34.0
+langchain>=0.1.16
+langchain-openai>=0.1.1
+langchain-google-genai>=0.0.8
+langchain-community>=0.1.16
+PyPDF2>=3.0.0
+faiss-cpu>=1.7.4
+pypdf>=5.4.0
