@@ -60,7 +60,7 @@ def init_chat_chain(provider: str, api_key: str, model_name: str, vectorstore):
 # ---------------------------- Streamlit UI -----------------------------
 st.set_page_config(page_title="PDF Chat", layout="wide")
 
-st.title("📄💬 PDF Chatbot")
+st.title("📄 PDF Chatbot")
 
 # Sidebar controls
 with st.sidebar:
