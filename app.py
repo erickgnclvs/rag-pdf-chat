@@ -125,16 +125,35 @@ with st.sidebar:
             help="Select from latest Gemini models. See Google GenAI docs for details."
         )[1]
 
-    uploaded_file = st.file_uploader("Upload a PDF", type="pdf", key="pdf_uploader")
+    uploaded_file = st.file_uploader(
+        "Upload a PDF or Markdown file", type=["pdf", "md"], key="pdf_uploader"
+    )
+
+    def process_md(uploaded_file, embeddings):
+        """Create a FAISS vector store from the uploaded Markdown file."""
+        text = uploaded_file.read().decode("utf-8")
+        # Optionally, you could use a Markdown parser here to extract sections
+        from langchain.schema import Document
+        doc = Document(page_content=text)
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        split_docs = splitter.split_documents([doc])
+        return FAISS.from_documents(split_docs, embeddings)
 
     if uploaded_file and api_key:
-        with st.spinner("Indexing PDF ..."):
+        with st.spinner("Indexing file ..."):
             embeddings = build_embeddings(provider, api_key)
-            vectorstore = process_pdf(uploaded_file, embeddings)
-            st.session_state["qa_chain"] = init_chat_chain(
-                provider, api_key, model_name, vectorstore
-            )
-            st.success("PDF indexed! Start chatting below 👇")
+            if uploaded_file.type == "application/pdf" or uploaded_file.name.lower().endswith(".pdf"):
+                vectorstore = process_pdf(uploaded_file, embeddings)
+            elif uploaded_file.type == "text/markdown" or uploaded_file.name.lower().endswith(".md"):
+                vectorstore = process_md(uploaded_file, embeddings)
+            else:
+                st.error("Unsupported file type. Please upload a PDF or Markdown file.")
+                vectorstore = None
+            if vectorstore:
+                st.session_state["qa_chain"] = init_chat_chain(
+                    provider, api_key, model_name, vectorstore
+                )
+                st.success("File indexed! Start chatting below 👇")
 
 # Chat interface
 qa_chain = st.session_state.get("qa_chain")
